@@ -36,7 +36,7 @@ class Chacha20_Blake2b_Lioness:
         self.cipher = Lioness(key, block_size, self.secret_key_len, self.hash_key_len, self.stream_cipher_xor, self.HMAC)
 
     def HMAC(self, key, data):
-        b = blake2b(data=data, key=key)
+        b = blake2b(data=data, key=key, digest_size=40)
         return b.digest()
 
     def stream_cipher_xor(self, key, data):
@@ -85,7 +85,7 @@ class Lioness:
         self.stream_cipher_xor = stream_cipher_xor
         self.HMAC = hmac
         self.k1 = key[:secret_key_len]
-        self.k2 = key[secret_key_len:hash_key_len]
+        self.k2 = key[secret_key_len:secret_key_len+hash_key_len]
         self.k3 = key[secret_key_len+hash_key_len:secret_key_len*2+hash_key_len]
         self.k4 = key[(2*secret_key_len+hash_key_len):hash_key_len+(2*secret_key_len+hash_key_len)]
 
@@ -105,7 +105,7 @@ class Lioness:
         r = self.stream_cipher_xor(tmp, block[l_size:l_size+r_size])
 
 	# Round 2: L = L ^ H(K2, R)
-        l = self.xor(block[:l_size], self.HMAC(self.k2, r)[:l_size])
+        l = self.xor(block[:l_size], self.HMAC(self.k2[:self.hash_key_len], r)[:l_size])
 
 	# Round 3: R = R ^ S(L ^ K3)
         tmp = self.xor(l, self.k3)
@@ -113,7 +113,8 @@ class Lioness:
 
         # Round 4: L = L ^ H(K4, R)
         l = self.xor(l, self.HMAC(self.k4, r)[:l_size])
-	return l + r
+
+        return l + r
 
     def decrypt(self, block):
         assert len(block) >= self.min_block_size
