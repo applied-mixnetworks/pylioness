@@ -27,20 +27,23 @@ class xcounter:
 class Chacha20_Blake2b_Lioness:
 
     def __init__(self, key, block_size):
+        assert(len(key) == 208)
         self.key = key
         self.block_size = block_size
         self.secret_key_len = 40
         self.hash_key_len = 64
         self.key_len = 32
         self.nonce_len = 8
-        self.cipher = Lioness(key, block_size, self.secret_key_len, self.hash_key_len, self.stream_cipher_xor, self.HMAC)
+        self.cipher = Lioness(key, block_size, self.secret_key_len, self.hash_key_len,
+                              self.stream_cipher_xor, self.HMAC)
 
     def HMAC(self, key, data):
         b = blake2b(data=data, key=key, digest_size=40)
         return b.digest()
 
     def stream_cipher_xor(self, key, data):
-        c = ChaCha20.new(key=key[self.nonce_len:self.nonce_len+self.key_len], nonce=key[:self.nonce_len])
+        c = ChaCha20.new(key=key[self.nonce_len:self.nonce_len+self.key_len],
+                         nonce=key[:self.nonce_len])
         return c.encrypt(data)
 
     def encrypt(self, block):
@@ -53,11 +56,13 @@ class Chacha20_Blake2b_Lioness:
 class AES_SHA256_Lioness:
 
     def __init__(self, key, block_size):
+        assert(key == 16)
         self.key = key
         self.block_size = block_size
         self.secret_key_len = 16
         self.hash_key_len = 32
-        self.cipher = Lioness(key, block_size, self.secret_key_len, self.hash_key_len, self.stream_cipher_xor, self.HMAC)
+        self.cipher = Lioness(key, block_size, self.secret_key_len,
+                              self.hash_key_len, self.stream_cipher_xor, self.HMAC)
 
     def HMAC(self, key, data):
         m = HMAC.new(key, msg=data, digestmod=SHA256)
