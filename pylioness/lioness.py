@@ -1,6 +1,5 @@
 
 from __future__ import absolute_import
-from __future__ import print_function
 from __future__ import with_statement
 
 from Crypto.Cipher import AES
@@ -9,19 +8,6 @@ from Crypto.Util.strxor import strxor
 from Crypto.Util import number
 from pyblake2 import blake2b
 from Cryptodome.Cipher import ChaCha20
-
-
-class xcounter:
-    # Implements a string counter to do AES-CTR mode
-    i = 0
-    def __init__(self, size):
-        self.size = size
-
-    def __call__(self):
-        ii = number.long_to_bytes(self.i)
-        ii = '\x00' * (self.size-len(ii)) + ii
-        self.i += 1
-        return ii
 
 
 class Chacha20_Blake2b_Lioness:
@@ -56,7 +42,7 @@ class Chacha20_Blake2b_Lioness:
 class AES_SHA256_Lioness:
 
     def __init__(self, key, block_size):
-        assert(key == 16)
+        assert(len(key) == 96)
         self.key = key
         self.block_size = block_size
         self.secret_key_len = 16
@@ -69,6 +55,17 @@ class AES_SHA256_Lioness:
         return m.digest()
 
     def stream_cipher_xor(self, key, data):
+        class xcounter:
+            def __init__(self, size):
+                self.i = 0
+                self.size = size
+            def __call__(self):
+                if self.i > 2**self.size:
+                    raise Exception("AES_stream_cipher counter exhausted.")
+                ii = number.long_to_bytes(self.i)
+                ii = '\x00' * (self.size-len(ii)) + ii
+                self.i += 1
+                return ii
         c = AES.new(key, AES.MODE_CTR, counter=xcounter(self.secret_key_len))
         return c.encrypt(data)        
 
@@ -113,7 +110,7 @@ class Lioness:
         l = self.xor(block[:l_size], self.HMAC(self.k2[:self.hash_key_len], r)[:l_size])
 
 	# Round 3: R = R ^ S(L ^ K3)
-        tmp = self.xor(l, self.k3)
+        tmp = self.xor(l[:l_size], self.k3[:l_size])
         r = self.stream_cipher_xor(tmp, r)
 
         # Round 4: L = L ^ H(K4, R)
