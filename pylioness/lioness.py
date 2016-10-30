@@ -7,6 +7,8 @@ from Crypto.Cipher import AES
 from Crypto.Hash import SHA256, HMAC
 from Crypto.Util.strxor import strxor
 from Crypto.Util import number
+from pyblake2 import blake2b
+from Cryptodome.Cipher import ChaCha20
 
 
 class xcounter:
@@ -20,6 +22,32 @@ class xcounter:
         ii = '\x00' * (self.size-len(ii)) + ii
         self.i += 1
         return ii
+
+
+class Chacha20_Blake2b_Lioness:
+
+    def __init__(self, key, block_size):
+        self.key = key
+        self.block_size = block_size
+        self.secret_key_len = 40
+        self.hash_key_len = 64
+        self.key_len = 32
+        self.nonce_len = 8
+        self.cipher = Lioness(key, block_size, self.secret_key_len, self.hash_key_len, self.stream_cipher_xor, self.HMAC)
+
+    def HMAC(self, key, data):
+        b = blake2b(data=data, key=key)
+        return b.digest()
+
+    def stream_cipher_xor(self, key, data):
+        c = ChaCha20.new(key=key[self.nonce_len:self.nonce_len+self.key_len], nonce=key[:self.nonce_len])
+        return c.encrypt(data)
+
+    def encrypt(self, block):
+        return self.cipher.encrypt(block)
+
+    def decrypt(self, block):
+        return self.cipher.decrypt(block)
 
 
 class AES_SHA256_Lioness:

@@ -10,5 +10,6 @@ from __future__ import with_statement
 
 
 __all__ = [
-    "Cipher"
+    "AES_SHA256_Lioness",
+    "Chacha20_Blake2b_Lioness"
 ]
