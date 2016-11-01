@@ -8,7 +8,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 from __future__ import with_statement
 
-from pylioness.lioness import AES_SHA256_Lioness, Chacha20_Blake2b_Lioness
+from pylioness.lioness import AESSHA256Lioness, Chacha20Blake2bLioness
 
 __all__ = [
     "AES_SHA256_Lioness",
