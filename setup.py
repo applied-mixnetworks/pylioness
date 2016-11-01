@@ -24,4 +24,12 @@ setup(
     #url=__url__,
     #license=__license__,
     packages=["pylioness"],
+    extras_require={
+        "test": [
+            "pytest",
+            "pyflakes",
+            "coverage",
+            "tox",
+        ]
+    }
 )
