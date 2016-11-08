@@ -4,6 +4,7 @@ import os
 
 from pylioness.lioness import AES_SHA256_Lioness, Chacha20_Blake2b_Lioness
 
+
 class Test_Lioness_basic(unittest.TestCase):
 
     def test_AES_SHA256_Lioness_end_to_end(self):

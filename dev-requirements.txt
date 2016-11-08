@@ -4,6 +4,5 @@ setuptools>=0.8.0
 coveralls
 codecov
 wheel
-twine
 pyflakes
 pep8

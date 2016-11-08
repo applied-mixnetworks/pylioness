@@ -14,17 +14,18 @@ class Chacha20_Blake2b_Lioness:
 
     def __init__(self, key, block_size):
         assert(len(key) == 208)
-        self.key = key
-        self.block_size = block_size
+
         self.secret_key_len = 40
         self.hash_key_len = 64
         self.key_len = 32
         self.nonce_len = 8
-        self.cipher = Lioness(key, block_size, self.secret_key_len, self.hash_key_len,
-                              self.stream_cipher_xor, self.HMAC)
 
-    def HMAC(self, key, data):
-        b = blake2b(data=data, key=key, digest_size=40)
+        self.cipher = Lioness(key, block_size, self.secret_key_len,
+                              self.hash_key_len, self.stream_cipher_xor,
+                              self.hash_mac)
+
+    def hash_mac(self, key, data):
+        b = blake2b(data=data, key=key, digest_size=self.secret_key_len)
         return b.digest()
 
     def stream_cipher_xor(self, key, data):
@@ -43,14 +44,15 @@ class AES_SHA256_Lioness:
 
     def __init__(self, key, block_size):
         assert(len(key) == 96)
-        self.key = key
-        self.block_size = block_size
+
         self.secret_key_len = 16
         self.hash_key_len = 32
-        self.cipher = Lioness(key, block_size, self.secret_key_len,
-                              self.hash_key_len, self.stream_cipher_xor, self.HMAC)
 
-    def HMAC(self, key, data):
+        self.cipher = Lioness(key, block_size, self.secret_key_len,
+                              self.hash_key_len, self.stream_cipher_xor,
+                              self.hash_mac)
+
+    def hash_mac(self, key, data):
         m = HMAC.new(key, msg=data, digestmod=SHA256)
         return m.digest()
 
@@ -59,6 +61,7 @@ class AES_SHA256_Lioness:
             def __init__(self, size):
                 self.i = 0
                 self.size = size
+
             def __call__(self):
                 if self.i > 2**self.size:
                     raise Exception("AES_stream_cipher counter exhausted.")
@@ -67,7 +70,7 @@ class AES_SHA256_Lioness:
                 self.i += 1
                 return ii
         c = AES.new(key, AES.MODE_CTR, counter=xcounter(self.secret_key_len))
-        return c.encrypt(data)        
+        return c.encrypt(data)
 
     def encrypt(self, block):
         return self.cipher.encrypt(block)
@@ -78,14 +81,16 @@ class AES_SHA256_Lioness:
 
 class Lioness:
 
-    def __init__(self, key, block_size, secret_key_len, hash_key_len, stream_cipher_xor, hmac):
+    def __init__(self, key, block_size, secret_key_len,
+                 hash_key_len, stream_cipher_xor, hmac):
         self.key = key
         self.block_size = block_size
         self.secret_key_len = secret_key_len
         self.hash_key_len = hash_key_len
         self.min_block_size = secret_key_len
         self.stream_cipher_xor = stream_cipher_xor
-        self.HMAC = hmac
+        self.hash_mac = hmac
+
         self.k1 = key[:secret_key_len]
         self.k2 = key[secret_key_len:secret_key_len+hash_key_len]
         self.k3 = key[secret_key_len+hash_key_len:secret_key_len*2+hash_key_len]
@@ -102,19 +107,19 @@ class Lioness:
         l_size = self.secret_key_len
         r_size = self.block_size - l_size
 
-	# Round 1: R = R ^ S(L ^ K1)
+        # Round 1: R = R ^ S(L ^ K1)
         tmp = self.xor(block[:l_size], self.k1)
         r = self.stream_cipher_xor(tmp, block[l_size:l_size+r_size])
 
         # Round 2: L = L ^ H(K2, R)
-        l = self.xor(block[:l_size], self.HMAC(self.k2[:self.hash_key_len], r)[:l_size])
+        l = self.xor(block[:l_size], self.hash_mac(self.k2[:self.hash_key_len], r)[:l_size])
 
         # Round 3: R = R ^ S(L ^ K3)
         tmp = self.xor(l[:l_size], self.k3[:l_size])
         r = self.stream_cipher_xor(tmp, r)
 
         # Round 4: L = L ^ H(K4, R)
-        l = self.xor(l, self.HMAC(self.k4, r)[:l_size])
+        l = self.xor(l, self.hash_mac(self.k4, r)[:l_size])
 
         return l + r
 
@@ -125,14 +130,14 @@ class Lioness:
         r_size = self.block_size - l_size
 
         # Round 4: L = L ^ H(K4, R)
-        l = self.xor(block[:l_size], self.HMAC(self.k4, block[l_size:l_size+r_size])[:l_size])
+        l = self.xor(block[:l_size], self.hash_mac(self.k4, block[l_size:l_size+r_size])[:l_size])
 
         # Round 3: R = R ^ S(L ^ K3)
         tmp = self.xor(l, self.k3)
         r = self.stream_cipher_xor(tmp, block[l_size:l_size+r_size])
 
         # Round 2: L = L ^ H(K2, R)
-        l = self.xor(l, self.HMAC(self.k2, r)[:l_size])
+        l = self.xor(l, self.hash_mac(self.k2, r)[:l_size])
 
         # Round 1: R = R ^ S(L ^ K1)
         tmp = self.xor(l, self.k1)
