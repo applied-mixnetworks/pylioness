@@ -63,7 +63,7 @@ class AES_SHA256_Lioness:
                 if self.i > 2**self.size:
                     raise Exception("AES_stream_cipher counter exhausted.")
                 ii = number.long_to_bytes(self.i)
-                ii = '\x00' * (self.size-len(ii)) + ii
+                ii = b'\x00' * (self.size-len(ii)) + ii
                 self.i += 1
                 return ii
         c = AES.new(key, AES.MODE_CTR, counter=xcounter(self.secret_key_len))
@@ -106,10 +106,10 @@ class Lioness:
         tmp = self.xor(block[:l_size], self.k1)
         r = self.stream_cipher_xor(tmp, block[l_size:l_size+r_size])
 
-	# Round 2: L = L ^ H(K2, R)
+        # Round 2: L = L ^ H(K2, R)
         l = self.xor(block[:l_size], self.HMAC(self.k2[:self.hash_key_len], r)[:l_size])
 
-	# Round 3: R = R ^ S(L ^ K3)
+        # Round 3: R = R ^ S(L ^ K3)
         tmp = self.xor(l[:l_size], self.k3[:l_size])
         r = self.stream_cipher_xor(tmp, r)
 
@@ -127,15 +127,15 @@ class Lioness:
         # Round 4: L = L ^ H(K4, R)
         l = self.xor(block[:l_size], self.HMAC(self.k4, block[l_size:l_size+r_size])[:l_size])
 
-	# Round 3: R = R ^ S(L ^ K3)
+        # Round 3: R = R ^ S(L ^ K3)
         tmp = self.xor(l, self.k3)
         r = self.stream_cipher_xor(tmp, block[l_size:l_size+r_size])
 
-	# Round 2: L = L ^ H(K2, R)
+        # Round 2: L = L ^ H(K2, R)
         l = self.xor(l, self.HMAC(self.k2, r)[:l_size])
 
-	# Round 1: R = R ^ S(L ^ K1)
+        # Round 1: R = R ^ S(L ^ K1)
         tmp = self.xor(l, self.k1)
         r = self.stream_cipher_xor(tmp, r)
 
-	return l + r
+        return l + r
