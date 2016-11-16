@@ -13,7 +13,8 @@ from Cryptodome.Cipher import ChaCha20
 class Chacha20_Blake2b_Lioness:
 
     def __init__(self, key, block_size):
-        assert(len(key) == 208)
+        assert len(key) == 208
+        assert block_size >= 40
 
         self.secret_key_len = 40
         self.hash_key_len = 64
@@ -43,7 +44,8 @@ class Chacha20_Blake2b_Lioness:
 class AES_SHA256_Lioness:
 
     def __init__(self, key, block_size):
-        assert(len(key) == 96)
+        assert len(key) == 96
+        assert block_size >= 32
 
         self.secret_key_len = 16
         self.hash_key_len = 32
