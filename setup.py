@@ -17,7 +17,14 @@ setup(
     keywords=['python', 'cryptography'],
     install_requires=open('requirements.txt').readlines(),
     classifiers=[
-        'Topic :: Security',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+        'Topic :: Security :: Cryptography',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.5',
     ],
+    license="GPLv3",
     packages=["pylioness"],
 )
