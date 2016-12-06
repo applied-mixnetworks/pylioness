@@ -1,0 +1,20 @@
+[run]
+branch = True
+source = pylioness
+parallel = True
+
+[paths]
+source=
+   pylioness
+   .tox/*/lib/python*/site-packages/pylioness
+   .tox/*/lib/site-packages/pylioness
+   .tox/pypy*/site-packages/pylioness
+
+[report]
+precision = 2
+exclude_lines =
+    def __repr__
+    raise AssertionError
+    pragma: no cover
+    if self\._debug
+    raise NotImplementedError

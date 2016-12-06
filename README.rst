@@ -6,6 +6,7 @@ README
     :alt: travis
 
 .. image:: https://coveralls.io/repos/github/david415/pylioness/badge.svg?branch=master
+    :target: https://coveralls.io/github/david415/pylioness
     :alt: coveralls
 
 overview
