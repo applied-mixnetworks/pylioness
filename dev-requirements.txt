@@ -6,3 +6,4 @@ codecov
 wheel
 pyflakes
 pep8
+flake8
