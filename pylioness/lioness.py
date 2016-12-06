@@ -30,7 +30,7 @@ class Chacha20_Blake2b_Lioness:
         return b.digest()
 
     def stream_cipher_xor(self, key, data):
-        c = ChaCha20.new(key=key[self.nonce_len:self.nonce_len+self.key_len],
+        c = ChaCha20.new(key=key[self.nonce_len:self.nonce_len + self.key_len],
                          nonce=key[:self.nonce_len])
         return c.encrypt(data)
 
@@ -68,7 +68,7 @@ class AES_SHA256_Lioness:
                 if self.i > 2**self.size:
                     raise Exception("AES_stream_cipher counter exhausted.")
                 ii = number.long_to_bytes(self.i)
-                ii = b'\x00' * (self.size-len(ii)) + ii
+                ii = b'\x00' * (self.size - len(ii)) + ii
                 self.i += 1
                 return ii
         c = AES.new(key, AES.MODE_CTR, counter=xcounter(self.secret_key_len))
@@ -94,9 +94,9 @@ class Lioness:
         self.hash_mac = hmac
 
         self.k1 = key[:secret_key_len]
-        self.k2 = key[secret_key_len:secret_key_len+hash_key_len]
-        self.k3 = key[secret_key_len+hash_key_len:secret_key_len*2+hash_key_len]
-        self.k4 = key[(2*secret_key_len+hash_key_len):hash_key_len+(2*secret_key_len+hash_key_len)]
+        self.k2 = key[secret_key_len:secret_key_len + hash_key_len]
+        self.k3 = key[secret_key_len + hash_key_len:secret_key_len * 2 + hash_key_len]
+        self.k4 = key[(2 * secret_key_len + hash_key_len):hash_key_len + (2 * secret_key_len + hash_key_len)]
 
     def xor(self, str1, str2):
         # XOR two strings
@@ -111,7 +111,7 @@ class Lioness:
 
         # Round 1: R = R ^ S(L ^ K1)
         tmp = self.xor(block[:l_size], self.k1)
-        r = self.stream_cipher_xor(tmp, block[l_size:l_size+r_size])
+        r = self.stream_cipher_xor(tmp, block[l_size:l_size + r_size])
 
         # Round 2: L = L ^ H(K2, R)
         l = self.xor(block[:l_size], self.hash_mac(self.k2[:self.hash_key_len], r)[:l_size])
@@ -132,11 +132,11 @@ class Lioness:
         r_size = self.block_size - l_size
 
         # Round 4: L = L ^ H(K4, R)
-        l = self.xor(block[:l_size], self.hash_mac(self.k4, block[l_size:l_size+r_size])[:l_size])
+        l = self.xor(block[:l_size], self.hash_mac(self.k4, block[l_size:l_size + r_size])[:l_size])
 
         # Round 3: R = R ^ S(L ^ K3)
         tmp = self.xor(l, self.k3)
-        r = self.stream_cipher_xor(tmp, block[l_size:l_size+r_size])
+        r = self.stream_cipher_xor(tmp, block[l_size:l_size + r_size])
 
         # Round 2: L = L ^ H(K2, R)
         l = self.xor(l, self.hash_mac(self.k2, r)[:l_size])

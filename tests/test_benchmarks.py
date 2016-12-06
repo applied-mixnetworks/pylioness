@@ -16,14 +16,16 @@ class Test_Lioness_benchmarks(unittest.TestCase):
             c = Chacha20_Blake2b_Lioness(key, len(block))
             ciphertext = c.encrypt(block)
         t1 = time.time()
-        print("Time per chacha20+blake2 lioness block encrypt: %.2fms" % ((t1-t0)*1000.0/100))
+        c = ciphertext
+        print("Time per chacha20+blake2 lioness block encrypt: %.2fms" % ((t1 - t0) * 1000.0 / 100))
 
     def test_timing_AES_SHA256_Lioness(self):
         block = b"'What do we know,' he had said, 'of the world and the universe about us? Our means of receiving impressions are absurdly few, and our notions of surrounding objects infinitely narrow. We see things only as we are constructed to see them, and can gain no idea of their absolute nature. With five feeble senses we pretend to comprehend the boundlessly complex cosmos, yet other beings with wider, stronger, or different range of senses might not only see very differently the things we see, but might see and st"
         key = os.urandom(96)
         t0 = time.time()
-        for _ in range(100):        
+        for _ in range(100):
             c = AES_SHA256_Lioness(key, len(block))
             ciphertext = c.encrypt(block)
         t1 = time.time()
-        print("Time per aes_ctr+sha256 lioness block encrypt: %.2fms" % ((t1-t0)*1000.0/100))
+        c = ciphertext
+        print("Time per aes_ctr+sha256 lioness block encrypt: %.2fms" % ((t1 - t0) * 1000.0 / 100))
