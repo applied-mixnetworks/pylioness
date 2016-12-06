@@ -2,9 +2,9 @@ language: python
 sudo: required
 dist: precise
 
-install: "sudo apt-get update && sudo apt-get install -y python-dev && pip install -r requirements.txt && pip install -r dev-requirements.txt"
+install: "sudo apt-get update && sudo apt-get install -y python-dev && pip install -r requirements.txt && pip install -r requirements-dev.txt"
 env:
-    - TOX_ENV=flake8
+    - TOX_ENV=style
     - TOX_ENV=py27
     - TOX_ENV=py33
     - TOX_ENV=py34
