@@ -12,6 +12,6 @@ README
 overview
 --------
 
-pylioness is a parameterized implementation of the LIONESS big block cipher.
-Use it with AES in counter mode + Sha256 or Chacha20 + Blake2.
+pylioness is a parameterized implementation of the LIONESS wide block cipher.
+Use it with AES in counter mode + Sha256 or Chacha20 + Blake2b.
 
