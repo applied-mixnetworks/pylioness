@@ -1,12 +1,13 @@
 
 import os
 import time
+import binascii
 
 from pylioness.lioness import AES_SHA256_Lioness, Chacha20_Blake2b_Lioness
 
 
 def test_timing_Chacha20_Blake2_Lioness():
-    key = b'\xff\xe3\xb2\xff-"\xbb\xd2\xa2\xb4/\x0e\xca.;\xfdF\xb9^`\xfcb.\xb5W\x1c\xc4\xed\xe5\x0c\x1c9\xff\xe2/\x1e\xa4\xe7\xa0\xb7E\xbb\x97\xd7\x9f\x02\x93\x9b\xaeK\xed\x83\xa1\xb0\xddDY\xd6\xa4m+:\xaeL\xa9\xce?\x82\x12B\x8e\xe5#q\x9d0\x06(\xb0\xf2\xe4\xae\x08\x85A\xf4\xac\x18\xac\xf6f\x1a\xc6B\x94\xa9\x84C\xcb\xbdU\x16\xfa\n\x11\n#-&\xf0u\xc7\xa4\xae\n\xb8@aJ\xe2\xaf\xf2\'S\xb1\xd2h\x18\xcf~\x12\x8eAOoq\x04X\x9b\x9dIA\xfa\xd4\xe4\xe2?\x8b\x19\x86>\xfb\xdfRY~\x93l\xf6\x97\x01"\x8dN\xdcl\x9e\x9eP#;&\xccb\xa2gIJ-r\xba\xdf\x1d\xf1\xfc\x11\xba\xd8\x9b\n\x93+\xd8\xf4[\x8e\xf2&\xca\xf0xI\xbfN\xaat\xea\xa3'
+    key = binascii.unhexlify("6fb8e9fb1899057ed6f5ded81288d9ff75fea899f697fb1aea588d9fa50ab6f2a6154fe7fba935720ecf07495a21761bb864d6931eb853a804a9dee71c37a8cbbc3a55247f5e44fa6f071470f5dbdf30de773da440783caf98ecf8de166e1e5248b3ba40b58bb15ce9274651a0c80cc65310a2f484eb15fe605102749f20c9be438c214a178360b4aa36ade0e8cf53d5d35982a8f6fcc91597deb3eb5a6656218abd1958ac483381e6a145e4f0934bca72cd8ec107b7de22e4600317282b7c6b")
     block = b"'What do we know,' he had said, 'of the world and the universe about us? Our means of receiving impressions are absurdly few, and our notions of surrounding objects infinitely narrow. We see things only as we are constructed to see them, and can gain no idea of their absolute nature. With five feeble senses we pretend to comprehend the boundlessly complex cosmos, yet other beings with wider, stronger, or different range of senses might not only see very differently the things we see, but might see and st"
     t0 = time.time()
     for _ in range(100):

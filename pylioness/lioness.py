@@ -12,26 +12,28 @@ from Cryptodome.Cipher import ChaCha20
 
 class Chacha20_Blake2b_Lioness:
 
-    def __init__(self, key, block_size):
-        assert len(key) == 208
-        assert block_size >= 40
+    KEY_LEN = 192
 
-        self.secret_key_len = 40
+    def __init__(self, key, block_size):
+        assert len(key) == self.KEY_LEN
+        assert block_size >= len(key)
+
+        self.stream_cipher_key_len = 32
         self.hash_key_len = 64
         self.key_len = 32
-        self.nonce_len = 8
 
-        self.cipher = Lioness(key, block_size, self.secret_key_len,
+        self.cipher = Lioness(key, block_size, self.stream_cipher_key_len,
                               self.hash_key_len, self.stream_cipher_xor,
                               self.hash_mac)
 
     def hash_mac(self, key, data):
-        b = blake2b(data=data, key=key, digest_size=self.secret_key_len)
+        b = blake2b(data=data, key=key, digest_size=self.stream_cipher_key_len)
         return b.digest()
 
     def stream_cipher_xor(self, key, data):
-        c = ChaCha20.new(key=key[self.nonce_len:self.nonce_len + self.key_len],
-                         nonce=key[:self.nonce_len])
+        zeroNonce = b"\x00" * 8
+        c = ChaCha20.new(key=key[:self.stream_cipher_key_len],
+                         nonce=zeroNonce)
         return c.encrypt(data)
 
     def encrypt(self, block):
@@ -47,10 +49,10 @@ class AES_SHA256_Lioness:
         assert len(key) == 96
         assert block_size >= 32
 
-        self.secret_key_len = 16
+        self.stream_cipher_key_len = 16
         self.hash_key_len = 32
 
-        self.cipher = Lioness(key, block_size, self.secret_key_len,
+        self.cipher = Lioness(key, block_size, self.stream_cipher_key_len,
                               self.hash_key_len, self.stream_cipher_xor,
                               self.hash_mac)
 
@@ -71,7 +73,7 @@ class AES_SHA256_Lioness:
                 ii = b'\x00' * (self.size - len(ii)) + ii
                 self.i += 1
                 return ii
-        c = AES.new(key, AES.MODE_CTR, counter=xcounter(self.secret_key_len))
+        c = AES.new(key, AES.MODE_CTR, counter=xcounter(self.stream_cipher_key_len))
         return c.encrypt(data)
 
     def encrypt(self, block):
@@ -83,20 +85,20 @@ class AES_SHA256_Lioness:
 
 class Lioness:
 
-    def __init__(self, key, block_size, secret_key_len,
+    def __init__(self, key, block_size, stream_cipher_key_len,
                  hash_key_len, stream_cipher_xor, hmac):
         self.key = key
         self.block_size = block_size
-        self.secret_key_len = secret_key_len
+        self.stream_cipher_key_len = stream_cipher_key_len
         self.hash_key_len = hash_key_len
-        self.min_block_size = secret_key_len
+        self.min_block_size = stream_cipher_key_len * 2 + hash_key_len * 2
         self.stream_cipher_xor = stream_cipher_xor
         self.hash_mac = hmac
 
-        self.k1 = key[:secret_key_len]
-        self.k2 = key[secret_key_len:secret_key_len + hash_key_len]
-        self.k3 = key[secret_key_len + hash_key_len:secret_key_len * 2 + hash_key_len]
-        self.k4 = key[(2 * secret_key_len + hash_key_len):hash_key_len + (2 * secret_key_len + hash_key_len)]
+        self.k1 = key[:stream_cipher_key_len]
+        self.k2 = key[stream_cipher_key_len:stream_cipher_key_len + hash_key_len]
+        self.k3 = key[stream_cipher_key_len + hash_key_len:stream_cipher_key_len * 2 + hash_key_len]
+        self.k4 = key[(2 * stream_cipher_key_len + hash_key_len):hash_key_len + (2 * stream_cipher_key_len + hash_key_len)]
 
     def xor(self, str1, str2):
         # XOR two strings
@@ -106,7 +108,7 @@ class Lioness:
     def encrypt(self, block):
         assert len(block) >= self.min_block_size
 
-        l_size = self.secret_key_len
+        l_size = self.stream_cipher_key_len
         r_size = self.block_size - l_size
 
         # Round 1: R = R ^ S(L ^ K1)
@@ -128,7 +130,7 @@ class Lioness:
     def decrypt(self, block):
         assert len(block) >= self.min_block_size
 
-        l_size = self.secret_key_len
+        l_size = self.stream_cipher_key_len
         r_size = self.block_size - l_size
 
         # Round 4: L = L ^ H(K4, R)

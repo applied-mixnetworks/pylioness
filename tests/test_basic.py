@@ -1,5 +1,6 @@
 
 import os
+import binascii
 
 from pylioness.lioness import AES_SHA256_Lioness, Chacha20_Blake2b_Lioness
 
@@ -17,7 +18,7 @@ def test_AES_SHA256_Lioness_end_to_end():
 
 def test_Chacha20_Blake2_Lioness_end_to_end():
     plaintext = b"'What do we know,' he had said, 'of the world and the universe about us? Our means of receiving impressions are absurdly few, and our notions of surrounding objects infinitely narrow. We see things only as we are constructed to see them, and can gain no idea of their absolute nature. With five feeble senses we pretend to comprehend the boundlessly complex cosmos, yet other beings with wider, stronger, or different range of senses might not only see very differently the things we see, but might see and st"
-    key = os.urandom(208)
+    key = os.urandom(Chacha20_Blake2b_Lioness.KEY_LEN)
     c = Chacha20_Blake2b_Lioness(key, len(plaintext))
     ciphertext = c.encrypt(plaintext)
     assert len(plaintext) == len(ciphertext)
@@ -29,14 +30,40 @@ def test_Chacha20_Blake2_Lioness_end_to_end():
 def test_vectors_Chacha20_Blake2_Lioness():
     vectors = [
         (
-            b'\x00' * 208,
-            b'v\xb8\xe0\xad\xa0\xf1=\x90@]j\xe5S\x86\xbd(\xbd\xd2\x19\xb8\xa0\x8d\xed\x1a\xa86\xef\xcc\x8bw\r\xc7\xdaAY|QWH\x8dw$\xe0?\xb8\xd8J7jC\xb8\xf4\x15\x18\xa1\x1c\xc3\x87\xb6i\xb2\xeee\x86\x9f\x07\xe7\xbeUQ8z\x98\xba\x97|s-\x08\r\xcb\x0f)\xa0H\xe3ei\x12\xc6S>2\xeez\xed)\xb7!v\x9c\xe6NC\xd5q3\xb0t\xd89\xd51\xed\x1f(Q\n\xfbE\xac\xe1\n\x1fKyMo',
-            b'\x9b\xadB\xcf\x81\x92\xb4\tdx\xf7\x810\x1c\x92\n\x12\xfa*YVDG\x05\xc0\xce\xd5\x03\x9e\x89\xedRz\xfab\xc5\x08@g\xf2P\x84Z\xf6T\xfaV(\xc7ZX\xac\xe4\x1d\xcc\x17\x04q\x06\x11]7\xbb\xa2g\xd8\xa7\x93\xdef\x93\x95e\x84\x93/\n\xfbRq\xf9z\x89\xe4Oo\x90\xac\x1fH\xf0\xabe\xb3\xd0\xd9o\x18\xc7t$\xaf}\xa5$\xca\x82i*\xb6&\xde\x10x\x98 \xad\x14e\x10\x12\xa7\x85j\xe4\xd6(O'
-        ),
-        (
-            b'\xff\xe3\xb2\xff-"\xbb\xd2\xa2\xb4/\x0e\xca.;\xfdF\xb9^`\xfcb.\xb5W\x1c\xc4\xed\xe5\x0c\x1c9\xff\xe2/\x1e\xa4\xe7\xa0\xb7E\xbb\x97\xd7\x9f\x02\x93\x9b\xaeK\xed\x83\xa1\xb0\xddDY\xd6\xa4m+:\xaeL\xa9\xce?\x82\x12B\x8e\xe5#q\x9d0\x06(\xb0\xf2\xe4\xae\x08\x85A\xf4\xac\x18\xac\xf6f\x1a\xc6B\x94\xa9\x84C\xcb\xbdU\x16\xfa\n\x11\n#-&\xf0u\xc7\xa4\xae\n\xb8@aJ\xe2\xaf\xf2\'S\xb1\xd2h\x18\xcf~\x12\x8eAOoq\x04X\x9b\x9dIA\xfa\xd4\xe4\xe2?\x8b\x19\x86>\xfb\xdfRY~\x93l\xf6\x97\x01"\x8dN\xdcl\x9e\x9eP#;&\xccb\xa2gIJ-r\xba\xdf\x1d\xf1\xfc\x11\xba\xd8\x9b\n\x93+\xd8\xf4[\x8e\xf2&\xca\xf0xI\xbfN\xaat\xea\xa3',
-            b'v\xb8\xe0\xad\xa0\xf1=\x90@]j\xe5S\x86\xbd(\xbd\xd2\x19\xb8\xa0\x8d\xed\x1a\xa86\xef\xcc\x8bw\r\xc7\xdaAY|QWH\x8dw$\xe0?\xb8\xd8J7jC\xb8\xf4\x15\x18\xa1\x1c\xc3\x87\xb6i\xb2\xeee\x86\x9f\x07\xe7\xbeUQ8z\x98\xba\x97|s-\x08\r\xcb\x0f)\xa0H\xe3ei\x12\xc6S>2\xeez\xed)\xb7!v\x9c\xe6NC\xd5q3\xb0t\xd89\xd51\xed\x1f(Q\n\xfbE\xac\xe1\n\x1fKyMo',
-            b'P\x88\xba4Q\xa9\\\xf1\x04\t\x80\x07\xf3\x00"hH\xab\xc7\xa0\xc0$\xe7\xbe\x06\x86n\xf6\xd6+\xf0\xa2\x85\xb8&\xcb\x97\xcf\x86(\t\x8a\xe7\xfa\t9\xee\x0f\x99\xadS\xca\xf9.\x0fX\xf4?\x9e\xd3\x1e~\xcf\x87\x18\xfa \xe3\x8c\xe0\xe5\xd6|\x1b\x851w\x1a\xca\x85j\xe5\xb9\xf1\x07Yw\xbd\xc7\xf03\xd1\x01\x9eNf\x92\xb8F\x03\x1dr~\xc6\xa1-$.\x7f\xdc\x13\xc5M3\xf6\x92\xfaM\x03\x85\x01\xa4\xd1!_O\x8c\xf0'
+            binascii.unhexlify("0f2c69732932c99e56fa50fbb2763ad77ee221fc5d9e6c08f89fc577a7467f1ee34" +
+                               "003440ee2bfbfaac60912b0e547fbe9a6a9292db70bc718c6f2773ab198ac8f25537" +
+                               "8f7ea799e1d4b8596079173b6e443c416f13195f1976acc03d53a4b8581b609df3b7" +
+                               "029d5b487051d5ae4189129c045edc8822e1f52e30251e4b322b3f6d6e8bb0ddb057" +
+                               "8dcba41603abf5e51848c84d2082d293f30a645faf4df028ee2c40853ea33e40b55f" +
+                               "ca902371dc00dc1e0e77161bd097a59e8368bf99174d9"),
+            binascii.unhexlify("5ac4cb9674a8908915a2b1aaf2043271612531911a26186bd5c811951330753a0e3259f3fcf52f" +
+                               "b86e666ab4d96243e57d73b976611f928d44ad137799016861576ca0a6b8a8a9e2ea02db71e71c" +
+                               "9654e476ca845c44456eba62f11f004b222756e485185c446c30b7a05cf9acd53b3131227b428d" +
+                               "a5c9601664d45ae5c2387956307961a0680894844190605dce0c86e597105884e151eb8a005eda" +
+                               "08ff5891a6b40bae299cddad979063a9a356f3477feabb9cc7bd80a1e2d6a419fcd8af9e98f7b1" +
+                               "93c71bd6056d7634b8c2b8f85920f314554104659e52d9266ddbc2ac40c1b875f6b00225f832cf" +
+                               "310e139ad8cc2568608f0323534fa15a84280e776e7e1167a001f6e18c49f3cd02c19837da47ac" +
+                               "091219ee2fdb4458836db20cbd362bb65add9b40f2817f666caf19787abc2013737eea8c7552d7" +
+                               "55a29beba5da31956f75fe7628221fe8d0a75da5bee39af956a2246c5a339560dcf029eb76d191" +
+                               "963354b70142df29ec69930977ce2f0e491513664ce83a8fa75f3e698530cf9dafbdb90b19745e" +
+                               "9257d03d7320c6d306f529eda242cb3f6f452a943f6e1c04eb02cbb0368d79e49a2b42ac3ff7cd" +
+                               "9a5686bfdb90a29322016bbcef5c733f451a9f4ea7c534116158eb611796d47b83ffe7cd6e6c11" +
+                               "d56e2d26c7a386853212a2f92efeabc74e8fe69e3d374d7b033d0ec9862221435b14ad534217ad" +
+                               "7da50bc236"),
+            binascii.unhexlify("9eb45ca2ca4d0b6ff05a749511aad1357aa64caf9ce547c7388fe24fd1300fe856bb5c396869a" +
+                               "cd21c45805e6a7c8a1b7f71cc5f0ea9dd0c4ecd4bba9a7a4853bc352bc9f6562e9907973f91fb" +
+                               "cf7c710f5a89abc8eb4489b90e8111cbf85ffd595d603268ddceb40e39e747a4e7bd5c965585b" +
+                               "6964e180bd6ccb9d0fad210c7f7dd6f90cf6db9bda70d41d3922cedec5ea147ef318de5f34e6f" +
+                               "e5bd646859a9d4171b973b6b58c8d7f94bc9eb293c197f3408a51e3626196e3f6bca625cef90f" +
+                               "a7a3e3713bdaebdda82f48db1a97c9ed5c48bc419dbc3d1f9ef43d1b17dd83c966bde9d9360b7" +
+                               "cdac0871844c27921dcf3bb7edce9fb24661a41a8f92c8502925f062e9cd2f77c561e5825eae2" +
+                               "11657652330bc64cd63b18d1014975f167f8b68d6e702dd3d3547971662238216cc5b07517cc9" +
+                               "0aaa49a61ee423861cdc49c0e1f64e086007095a00f8adb0314fd85c88158001202edf2ed43c2" +
+                               "01176d6141e469dd89430352a927ee22a41c62c8cfdfd5d592e76793e58a9c63b7fe6dad335d7" +
+                               "acec90727675854d7708358115794e013bb4fdb504c44e21ce500f764fac211e8de20b81ca55f" +
+                               "c778ace024d2a40045241e71b023ceb519c8c28285c333b9f90f5e2cde21ca6744e43f89d0054" +
+                               "5dd34df072c7214f6cbd2123c4b0613614609961dd855d6d611c3018e4df3550b4e93f33f7c3e" +
+                               "8b2c890ca0405c957aa277d"),
         ),
     ]
 
