@@ -9,8 +9,8 @@ README
     :target: https://www.travis-ci.org/applied-mixnetworks/pylioness
     :alt: travis
 
-.. image:: https://coveralls.io/repos/github/david415/pylioness/badge.svg?branch=master
-    :target: https://coveralls.io/github/david415/pylioness
+.. image:: https://coveralls.io/repos/github/applied-mixnetworks/pylioness/badge.svg?branch=master
+    :target: https://coveralls.io/github/applied-mixnetworks/pylioness
     :alt: coveralls
 
 
