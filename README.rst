@@ -1,8 +1,12 @@
 README
 ======
 
-.. image:: https://travis-ci.org/david415/pylioness.png?branch=master
-    :target: https://www.travis-ci.org/david415/pylioness
+.. image:: http://img.shields.io/pypi/v/pylioness.svg
+   :target: https://pypi.python.org/pypi/pylioness
+   :alt: PyPI Package
+
+.. image:: https://travis-ci.org/applied-mixnetworks/pylioness.png?branch=master
+    :target: https://www.travis-ci.org/applied-mixnetworks/pylioness
     :alt: travis
 
 .. image:: https://coveralls.io/repos/github/david415/pylioness/badge.svg?branch=master
